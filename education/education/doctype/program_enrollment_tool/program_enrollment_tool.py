@@ -27,42 +27,59 @@ class ProgramEnrollmentTool(Document):
 		elif not self.academic_year:
 			frappe.throw(_("Mandatory field - Academic Year"))
 		else:
-			condition = "and academic_term=%(academic_term)s" if self.academic_term else " "
+			condition = "and academic_term=%(academic_term)s" if self.academic_term else ""
+			condition2 = "and student_batch_name=%(student_batch)s" if self.student_batch else ""
+
 			if self.get_students_from == "Student Applicant":
 				students = frappe.db.sql(
-					"""select name as student_applicant, title as student_name from `tabStudent Applicant`
-					where application_status="Approved" and program=%(program)s and academic_year=%(academic_year)s {0}""".format(
-						condition
-					),
-					self.as_dict(),
+					"""
+					SELECT 
+						name AS student_applicant, 
+						title AS student_name 
+					FROM 
+						`tabStudent Applicant`
+					WHERE 
+						application_status='Approved' 
+						AND program=%(program)s 
+						AND academic_year=%(academic_year)s 
+						{condition}
+					""".format(condition=condition),
+					{"academic_year": self.academic_year, "program": self.program, "academic_term": self.academic_term},
 					as_dict=1,
 				)
+
 			elif self.get_students_from == "Program Enrollment":
-				condition2 = (
-					"and student_batch_name=%(student_batch)s" if self.student_batch else " "
-				)
 				students = frappe.db.sql(
-					"""select student, student_name, student_batch_name, student_category from `tabProgram Enrollment`
-					where program=%(program)s and academic_year=%(academic_year)s {0} {1} and docstatus != 2""".format(
-						condition, condition2
-					),
-					self.as_dict(),
+					"""
+					SELECT 
+						pe.student, 
+						pe.student_name, 
+						pe.student_batch_name, 
+						pe.student_category,
+						s.custom_division AS current_division
+					FROM 
+						`tabProgram Enrollment` pe
+					LEFT JOIN 
+						`tabStudent` s 
+					ON 
+						pe.student = s.name 
+					WHERE 
+						pe.program=%(program)s 
+						AND pe.academic_year=%(academic_year)s 
+						{condition} 
+						{condition2}
+						AND pe.docstatus != 2
+						AND s.student_status in ('Current student', 'Defaulter')
+						AND s.confirm_for_next_year != "No"
+					""".format(condition=condition, condition2=condition2),
+					{
+						"academic_year": self.academic_year, 
+						"program": self.program, 
+						"student_batch": self.student_batch, 
+						"academic_term": self.academic_term,
+					},
 					as_dict=1,
 				)
-
-				student_list = [d.student for d in students]
-				if student_list:
-					inactive_students = frappe.db.sql(
-						"""
-						select name as student, student_name from `tabStudent` where name in (%s) and enabled = 0"""
-						% ", ".join(["%s"] * len(student_list)),
-						tuple(student_list),
-						as_dict=1,
-					)
-
-					for student in students:
-						if student.student in [d.student for d in inactive_students]:
-							students.remove(student)
 
 		if students:
 			return students
@@ -77,9 +94,12 @@ class ProgramEnrollmentTool(Document):
 				"program_enrollment_tool", dict(progress=[i + 1, total]), user=frappe.session.user
 			)
 			if stud.student:
+				filters = {"student_group_name": stud.current_division, "academic_year": self.academic_year, "program": self.program}
+				student_group = frappe.get_value("Student Group", filters, "name")
 				prog_enrollment = frappe.new_doc("Program Enrollment")
 				prog_enrollment.student = stud.student
 				prog_enrollment.student_name = stud.student_name
+				prog_enrollment.student_group = student_group
 				prog_enrollment.student_category = stud.student_category
 				prog_enrollment.program = self.new_program
 				prog_enrollment.academic_year = self.new_academic_year

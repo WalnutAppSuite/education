@@ -98,6 +98,7 @@ class ProgramEnrollmentTool(Document):
 				student_group = frappe.get_value("Student Group", filters, "name")
 				prog_enrollment = frappe.new_doc("Program Enrollment")
 				prog_enrollment.student = stud.student
+				prog_enrollment.rte_status = self.get_rte_status(stud, self.new_program)
 				prog_enrollment.student_name = stud.student_name
 				prog_enrollment.student_group = student_group
 				prog_enrollment.student_category = stud.student_category
@@ -117,3 +118,30 @@ class ProgramEnrollmentTool(Document):
 				)
 				prog_enrollment.save()
 		frappe.msgprint(_("{0} Students have been enrolled").format(total))
+
+
+	def get_rte_status(self, student, new_program):
+		"""
+		Get the previous RTE status of the student and determine the new RTE status based on the new program.
+	
+		:param student: Student object containing student details.
+		:param new_program: The new program the student is enrolling in.
+		:return: New RTE status.
+		"""
+		try:
+			school = frappe.get_value("Student", student.student, "school")
+			rte_deactivation_class = frappe.get_value("School", school, "rte_deactivation_class")
+		
+			old_rte_status = frappe.get_value(
+				"Program Enrollment",
+				filters={"student": student.student, "academic_year": self.academic_year, "docstatus": 1}, 
+				fieldname="rte_status"
+			) or "Inactive"
+		
+			if new_program == rte_deactivation_class:
+				if old_rte_status == "Active":
+					return "Inactivation Pending"
+			return old_rte_status
+		except Exception as e:
+			message = f"Error in finding RTE status of student {student.student}: {str(e)}"
+			frappe.log_error(_(message), frappe.get_traceback())

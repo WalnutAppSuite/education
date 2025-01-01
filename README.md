@@ -1,4 +1,4 @@
-<div align="center" markdown="1">
+<img width="1552" alt="Screenshot 2025-01-01 at 6 16 15 PM" src="https://github.com/user-attachments/assets/d1085e1b-ccdd-4569-a269-fdb6dd1306f0" /><div align="center" markdown="1">
 
 <img src=".github/edu-logo.svg" alt="Frappe Education Logo" width="80">
 
@@ -12,7 +12,7 @@
 
 
 <div align="center">
-	<img src="https://github.com/frappe/education/assets/65544983/226acaff-57ef-4205-ba92-a19affba3136" alt="Hero Image" width="100%" />
+	<img src="https://github.com/frappe/education/assets/65544983/3bc3f873-ab07-460d-874a-1f051b58a693" alt="Hero Image" width="100%" />
 </div>
 <br />
 <div align="center">
@@ -49,7 +49,11 @@ Frappe Education is dedicated to making education management more efficient and 
 	</sub>
 </div>
 
-<img width="1316" alt="Screenshot 2024-03-16 at 4 15 33 PM" src="https://github.com/frappe/education/assets/65544983/8a22a217-e637-451a-b95e-489aac846b43">
+
+<img width="1300" alt="Screenshot 2025-01-01 at 6 09 34 PM" src="https://github.com/user-attachments/assets/78263a31-eb9f-45f0-a7a4-486f75c2b774" />
+
+
+
 
 <div align="center">
 	<sub>
@@ -57,15 +61,18 @@ Frappe Education is dedicated to making education management more efficient and 
 	</sub>
 </div>
 
-<img width="1242" alt="Screenshot 2024-03-08 at 1 21 58 AM" src="https://github.com/frappe/education/assets/65544983/a021627f-f2a0-4032-8a7a-d10d5493daa1">
+<img width="1300" alt="Screenshot 2025-01-01 at 6 12 40 PM" src="https://github.com/user-attachments/assets/7dcf7e7b-a003-4520-a41e-84ca553e7f0d" />
+
 
 <div align="center">
 	<sub>
-		Student Portal - Student Time Table
+		Efficiently schedule courses and manage course calendars. 🗓️
 	</sub>
 </div>
 
-<img width="1439" alt="Screenshot 2024-02-21 at 6 03 02 PM" src="https://github.com/frappe/education/assets/65544983/3bc3f873-ab07-460d-874a-1f051b58a693">
+
+<img width="1300" alt="Screenshot 2025-01-01 at 6 19 49 PM" src="https://github.com/user-attachments/assets/19106f12-c278-48f9-8be3-47db5ce3a5f3" />
+
 
 <div align="center">
 	<sub>
@@ -73,7 +80,7 @@ Frappe Education is dedicated to making education management more efficient and 
 	</sub>
 </div>
 
-<img width="1440" alt="Screenshot 2024-02-21 at 6 03 20 PM" src="https://github.com/frappe/education/assets/65544983/c1e6c407-7eef-4ed5-b204-ca5ea66957ff">
+<img width="1300" alt="Screenshot 2025-01-01 at 6 16 27 PM" src="https://github.com/user-attachments/assets/0640c623-bc81-4308-a15d-53a5977d5011" />
 
 
 </details>

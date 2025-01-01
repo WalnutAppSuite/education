@@ -1,4 +1,4 @@
-<img width="1552" alt="Screenshot 2025-01-01 at 6 16 15 PM" src="https://github.com/user-attachments/assets/d1085e1b-ccdd-4569-a269-fdb6dd1306f0" /><div align="center" markdown="1">
+<div align="center" markdown="1">
 
 <img src=".github/edu-logo.svg" alt="Frappe Education Logo" width="80">
 
@@ -12,7 +12,8 @@
 
 
 <div align="center">
-	<img src="https://github.com/frappe/education/assets/65544983/3bc3f873-ab07-460d-874a-1f051b58a693" alt="Hero Image" width="100%" />
+	<img width="1552" alt="Screenshot 2025-01-01 at 6 24 15 PM" src="https://github.com/user-attachments/assets/46af048c-749f-41f7-8d10-47e4fa643592" width="100%" />
+
 </div>
 <br />
 <div align="center">

@@ -19,10 +19,12 @@
   "section_break_6",
   "schedule_date",
   "room",
+  "period_no",
   "column_break_9",
   "from_time",
   "to_time",
-  "title"
+  "title",
+  "day"
  ],
  "fields": [
   {
@@ -132,10 +134,24 @@
    "label": "Class Schedule Color",
    "options": "blue\ngreen\nred\norange\nyellow\nteal\nviolet\ncyan\namber\npink\npurple",
    "print_hide": 1
+  },
+  {
+   "fieldname": "period_no",
+   "fieldtype": "Int",
+   "label": "Period No",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "day",
+   "fieldtype": "Select",
+   "label": "Day",
+   "options": "Monday\nTuesday\nWednesday\nThursday\nFriday\nSaturday",
+   "reqd": 1
   }
  ],
  "links": [],
- "modified": "2024-02-20 16:02:05.583081",
+ "modified": "2025-01-24 11:18:29.570176",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Course Schedule",

@@ -18,10 +18,12 @@
   "section_break_6",
   "schedule_date",
   "room",
+  "period_no",
   "column_break_9",
   "from_time",
   "to_time",
-  "title"
+  "title",
+  "day"
  ],
  "fields": [
   {
@@ -122,10 +124,33 @@
    "label": "Program",
    "options": "Program",
    "read_only": 1
+  },
+  {
+   "default": "blue",
+   "fieldname": "class_schedule_color",
+   "fieldtype": "Select",
+   "label": "Class Schedule Color",
+   "options": "blue\ngreen\nred\norange\nyellow\nteal\nviolet\ncyan\namber\npink\npurple",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "period_no",
+   "fieldtype": "Int",
+   "label": "Period No",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
+   "default": "Monday",
+   "fieldname": "day",
+   "fieldtype": "Select",
+   "label": "Day",
+   "options": "Monday\nTuesday\nWednesday\nThursday\nFriday\nSaturday",
+   "reqd": 1
   }
  ],
  "links": [],
- "modified": "2022-12-13 15:49:43.766325",
+ "modified": "2025-01-27 09:41:26.176067",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Course Schedule",

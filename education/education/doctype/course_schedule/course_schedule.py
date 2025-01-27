@@ -20,6 +20,10 @@ class CourseSchedule(Document):
 		self.validate_date()
 		self.validate_time()
 		self.validate_overlap()
+		self.validate_day_and_period_no()
+  
+	def before_save(self):
+		self.set_hex_color()
 
 	def set_title(self):
 		"""Set document Title"""
@@ -99,3 +103,45 @@ class CourseSchedule(Document):
 
 		validate_overlap_for(self, "Assessment Plan", "room")
 		validate_overlap_for(self, "Assessment Plan", "supervisor", self.instructor)
+
+	def set_hex_color(self):
+		colors = {
+			"blue": "#EDF6FD",
+			"green": "#E4F5E9",
+			"red": "#FFF0F0",
+			"orange": "#FFF1E7",
+			"yellow": "#FFF7D3",
+			"teal": "#E6F7F4",
+			"violet": "#F5F2FF",
+			"cyan": "#E0F8FF",
+			"amber": "#FCF3CF",
+			"pink": "#FEEEF8",
+			"purple": "#F9F0FF",
+		}
+		self.color = colors[self.class_schedule_color or "green"]
+
+	def validate_day_and_period_no(self):
+		"""
+		Validate that the combination of day and period_no is unique within a division.
+		"""
+		if not self.division or not self.day or not self.period_no:
+			frappe.throw(_("Division, Day, and Period No must be set."))
+
+
+		conflicting_schedule = frappe.db.exists(
+			"Course Schedule",
+			{
+				"division": self.division,
+				"day": self.day,
+				"period_no": self.period_no,
+				"name": ("!=", self.name)
+			}
+		)
+
+		if conflicting_schedule:
+			frappe.throw(
+				_(
+					"A schedule already exists for Division {0} on Day {1} during Period No {2}. "
+					"Please choose a different day or period."
+				).format(self.division, self.day, self.period_no)
+			)

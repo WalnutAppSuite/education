@@ -71,18 +71,21 @@
    "fieldtype": "Data",
    "in_global_search": 1,
    "label": "First Name",
+   "read_only_depends_on": "eval:!frappe.user.has_role('Administrator')\r\n\r\n",
    "reqd": 1
   },
   {
    "fieldname": "middle_name",
    "fieldtype": "Data",
-   "label": "Middle Name"
+   "label": "Middle Name",
+   "read_only_depends_on": "eval:!frappe.user.has_role('Administrator')\r\n"
   },
   {
    "fieldname": "last_name",
    "fieldtype": "Data",
    "in_global_search": 1,
-   "label": "Last Name"
+   "label": "Last Name",
+   "read_only_depends_on": "eval:!frappe.user.has_role('Administrator')"
   },
   {
    "fieldname": "user",
@@ -282,7 +285,7 @@
  ],
  "image_field": "image",
  "links": [],
- "modified": "2023-02-06 12:25:25.197460",
+ "modified": "2025-01-24 11:45:16.601875",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Student",

@@ -26,7 +26,7 @@ frappe.ui.form.on('Student', {
 frappe.ui.form.on('Student', {
     refresh: function (frm) {
         frm.add_custom_button(__('Update Student Name'), function () {
-            let ticketCreatedUsingButton = false; 
+            let ticketCreatedUsingButton = false;
 
             let dialog = new frappe.ui.Dialog({
                 title: 'Update Student Name',
@@ -88,6 +88,16 @@ frappe.ui.form.on('Student', {
                     if (values.has_ticket && !values.help_desk_ticket_url) {
                         frappe.msgprint(__('Please provide a valid HelpDesk Ticket URL.'));
                         return;
+                    }
+
+                    // Validate file type (only images and PDFs)
+                    if (values.attachment) {
+                        let allowed_extensions = ['jpg', 'jpeg', 'png', 'pdf'];
+                        let file_extension = values.attachment.split('.').pop().toLowerCase();
+                        if (!allowed_extensions.includes(file_extension)) {
+                            frappe.msgprint(__('Only image files (JPG, PNG) and PDFs are allowed.'));
+                            return;
+                        }
                     }
 
                     frappe.call({
@@ -177,6 +187,7 @@ frappe.ui.form.on('Student', {
                                 if (response.message) {
                                     const ticket_name = response.message.name;
                                     dialog.set_value('help_desk_ticket_url', ticket_name);
+                                    dialog.set_value('has_ticket', 1); // Auto-check the checkbox
                                     frappe.msgprint(__('HelpDesk Ticket created successfully: ') + ticket_name);
 
                                     ticketCreatedUsingButton = true;
@@ -195,6 +206,7 @@ frappe.ui.form.on('Student', {
         });
     }
 });
+
 
 frappe.ui.form.on('Student Guardian', {
 	guardians_add: function(frm){

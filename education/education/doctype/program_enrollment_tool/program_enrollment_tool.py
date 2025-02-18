@@ -94,10 +94,11 @@ class ProgramEnrollmentTool(Document):
 				"program_enrollment_tool", dict(progress=[i + 1, total]), user=frappe.session.user
 			)
 			if stud.student:
-				filters = {"student_group_name": stud.current_division, "academic_year": self.academic_year, "program": self.program}
+				filters = {"student_group_name": stud.current_division, "academic_year": self.new_academic_year, "program": self.new_program}
 				student_group = frappe.get_value("Student Group", filters, "name")
 				prog_enrollment = frappe.new_doc("Program Enrollment")
 				prog_enrollment.student = stud.student
+				prog_enrollment.rte_status = self.get_rte_status(stud, self.new_program)
 				prog_enrollment.student_name = stud.student_name
 				prog_enrollment.student_group = student_group
 				prog_enrollment.student_category = stud.student_category
@@ -107,6 +108,7 @@ class ProgramEnrollmentTool(Document):
 				prog_enrollment.student_batch_name = (
 					stud.student_batch_name if stud.student_batch_name else self.new_student_batch
 				)
+				prog_enrollment.payment_plan = self.get_payment_plan()
 				prog_enrollment.save()
 			elif stud.student_applicant:
 				prog_enrollment = enroll_student(stud.student_applicant)
@@ -117,3 +119,41 @@ class ProgramEnrollmentTool(Document):
 				)
 				prog_enrollment.save()
 		frappe.msgprint(_("{0} Students have been enrolled").format(total))
+
+
+	def get_rte_status(self, student, new_program):
+		"""
+		Get the previous RTE status of the student and determine the new RTE status based on the new program.
+	
+		:param student: Student object containing student details.
+		:param new_program: The new program the student is enrolling in.
+		:return: New RTE status.
+		"""
+		school = frappe.get_value("Student", student.student, "school")
+		rte_deactivation_class = frappe.get_value("School", school, "rte_deactivation_class")
+	
+		old_rte_status = frappe.get_value(
+			"Program Enrollment",
+			filters={"student": student.student, "academic_year": self.academic_year, "docstatus": 1}, 
+			fieldname="rte_status"
+		) or "Not Applicable"
+	
+		if new_program == rte_deactivation_class:
+			if old_rte_status == "Active":
+				return "Inactivation Pending"
+		return old_rte_status
+	
+	def get_payment_plan(self):
+		fee_structure = frappe.get_value(
+            "Fee Structure",
+            {"program": self.new_program, "academic_year": self.new_academic_year, "docstatus": 1},
+            "name",
+        )
+		payment_plan = frappe.get_value(
+            "Fee Schedule", {"fee_structure": fee_structure, "docstatus": 1}, "payment_plan"
+        )
+		if not payment_plan:
+			payment_plan = frappe.get_value("Payment Plan", {"fee_structure": fee_structure, "academic_year": self.new_academic_year})
+
+		return payment_plan
+	

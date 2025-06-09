@@ -1,9 +1,36 @@
 // Copyright (c) 2016, Frappe and contributors
 // For license information, please see license.txt
 
-
 frappe.ui.form.on('Program Enrollment', {
 
+	refresh: function(frm) {
+		// Add "Update Photo" button for both draft and submitted documents
+		frm.add_custom_button(__('Update Photo'), function() {
+			new frappe.ui.FileUploader({
+				doctype: 'Program Enrollment',
+				docname: frm.doc.name,
+				allow_multiple: false,
+				restrictions: {
+					allowed_file_types: ['image/*']
+				},
+				on_success: function(file_doc) {
+					// After upload, process the image
+					frappe.call({
+						method: 'education.education.doctype.program_enrollment.program_enrollment.process_enrollment_image',
+						args: {
+							docname: frm.doc.name,
+							file_url: file_doc.file_url
+						},
+						callback: function(r) {
+							if(r.message) {
+								frm.reload_doc();
+							}
+						}
+					});
+				}
+			});
+		});
+	},
 	onload: function(frm) {
 		frm.set_query('academic_term', function() {
 			return {

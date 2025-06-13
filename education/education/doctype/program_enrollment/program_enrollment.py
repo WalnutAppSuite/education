@@ -37,6 +37,95 @@ class ProgramEnrollment(Document):
         self.update_student_joining_date()
         self.make_fee_records()
         self.create_course_enrollments()
+        
+    def on_trash(self):
+        """
+        When a Program Enrollment is deleted, delete related Birthday Card and User Permissions
+        """
+        try:
+            self.delete_birthday_card_permissions()
+            self.delete_birthday_card()
+        except Exception as e:
+            frappe.log_error(
+                f"Error in birthday card cleanup during Program Enrollment deletion: {str(e)}",
+                "Birthday Card Cleanup Error"
+            )
+            # Continue with deletion process even if birthday card cleanup fails
+
+    def on_cancel(self):
+        """
+        When a Program Enrollment is cancelled, delete related Birthday Card and User Permissions
+        """
+        try:
+            self.delete_birthday_card_permissions()
+            self.delete_birthday_card()
+        except Exception as e:
+            frappe.log_error(
+                f"Error in birthday card cleanup during Program Enrollment cancellation: {str(e)}",
+                "Birthday Card Cleanup Error"
+            )
+            # Continue with cancellation process even if birthday card cleanup fails
+
+    def delete_birthday_card_permissions(self):
+        """
+        Delete all User Permissions where:
+        - allow = "Birthday Card"
+        - for_value matches this Program Enrollment's name
+        """
+        # Find all matching User Permissions
+        user_permissions = frappe.get_all(
+            "User Permission",
+            filters={
+                "allow": "Birthday Card",
+                "for_value": self.name
+            },
+            fields=["name"]
+        )
+        
+        # Log the permissions to be deleted
+        if user_permissions:
+            frappe.log_error(
+                f"Deleting {len(user_permissions)} User Permissions for Birthday Card: {self.name}",
+                "Birthday Card Cleanup"
+            )
+        
+        # Delete each permission
+        for permission in user_permissions:
+            try:
+                frappe.delete_doc("User Permission", permission.name, force=True)
+            except Exception as e:
+                frappe.log_error(
+                    f"Failed to delete User Permission {permission.name}: {str(e)}",
+                    "Birthday Card Cleanup Error"
+                )
+
+    def delete_birthday_card(self):
+        """
+        Delete the Birthday Card document associated with this Program Enrollment
+        """
+        try:
+            # Check if a Birthday Card exists for this Program Enrollment
+            birthday_card = frappe.get_all(
+                "Birthday Card",
+                filters={"program_enrollment": self.name},
+                fields=["name"]
+            )
+            
+            if birthday_card:
+                # Log the birthday card to be deleted
+                frappe.log_error(
+                    f"Deleting Birthday Card: {birthday_card[0].name}",
+                    "Birthday Card Cleanup"
+                )
+                
+                # Delete the Birthday Card
+                frappe.delete_doc("Birthday Card", birthday_card[0].name, force=True)
+                frappe.msgprint(f"Birthday Card {birthday_card[0].name} has been deleted.")
+        except Exception as e:
+            frappe.log_error(
+                f"Failed to delete Birthday Card for {self.name}: {str(e)}",
+                "Birthday Card Cleanup Error"
+            )
 
     def validate_academic_year(self):
         start_date, end_date = frappe.db.get_value(

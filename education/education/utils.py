@@ -8,24 +8,34 @@ class OverlapError(frappe.ValidationError):
 	pass
 
 
+
 def validate_overlap_for(doc, doctype, fieldname, value=None):
-	"""Checks overlap for specified field.
+    """Checks overlap for specified field."""
 
-	:param fieldname: Checks Overlap for this field
-	"""
+    existing = get_overlap_for(doc, doctype, fieldname, value)
 
-	existing = get_overlap_for(doc, doctype, fieldname, value)
-	if existing:
-		frappe.throw(
-			_("This {0} conflicts with {1} for {2} {3}").format(
-				doc.doctype,
-				existing.name,
-				doc.meta.get_label(fieldname) if not value else fieldname,
-				value or doc.get(fieldname),
-			),
-			OverlapError,
-		)
+    if existing:
+        #  ADD THIS CONDITION
+        # Load the existing document to check values
+        existing_doc = frappe.get_doc(doctype, existing.name)
 
+        same_student_group = (existing_doc.student_group == doc.student_group)
+        same_subject = (existing_doc.course == doc.course)  # subject
+
+        # Throw error ONLY if both match
+        if same_student_group and same_subject:
+            frappe.throw(
+                _("This {0} conflicts with {1} for {2} {3}").format(
+                    doc.doctype,
+                    existing.name,
+                    doc.meta.get_label(fieldname) if not value else fieldname,
+                    value or doc.get(fieldname),
+                ),
+                OverlapError,
+            )
+        else:
+            # If student group OR subject doesn't match → no conflict
+            return
 
 def get_overlap_for(doc, doctype, fieldname, value=None):
 	"""Returns overlaping document for specified field.

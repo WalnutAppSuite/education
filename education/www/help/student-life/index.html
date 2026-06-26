@@ -75,8 +75,13 @@
 		--ws-help-shadow: 0 18px 45px rgba(17, 24, 39, 0.08);
 	}
 
+	html,
 	body {
-		overflow-x: hidden;
+		width: 100% !important;
+		max-width: 100% !important;
+		margin: 0 !important;
+		padding: 0 !important;
+		overflow-x: hidden !important;
 	}
 
 	.navbar,
@@ -88,8 +93,9 @@
 	.page-content-wrapper,
 	.web-page,
 	.container {
+		width: 100% !important;
 		max-width: 100% !important;
-		overflow-x: hidden;
+		overflow-x: hidden !important;
 		padding-left: 0 !important;
 		padding-right: 0 !important;
 	}
@@ -165,9 +171,10 @@
 
 	.ws-help-shell {
 		display: grid;
-		gap: 1rem;
-		padding: 1rem;
+		gap: .85rem;
+		width: 100%;
 		max-width: 1180px;
+		padding: .75rem;
 		margin: 0 auto;
 	}
 
@@ -231,9 +238,10 @@
 	}
 
 	.ws-help-accordion-body {
-		padding: .35rem 0 .2rem .55rem;
+		max-width: 100%;
+		padding: .35rem 0 .2rem .35rem;
 		border-left: 2px solid #e6f0fb;
-		margin-left: .7rem;
+		margin-left: .35rem;
 	}
 
 	.ws-help-leaf {
@@ -242,6 +250,8 @@
 		justify-content: space-between;
 		gap: .75rem;
 		width: 100%;
+		max-width: 100%;
+		min-width: 0;
 		margin: .35rem 0;
 		padding: .78rem .9rem;
 		border-radius: 14px;

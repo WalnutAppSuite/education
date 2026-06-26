@@ -1,6 +1,6 @@
 import re
 from html import escape
-from urllib.parse import quote
+from urllib.parse import parse_qs, quote, unquote, urlparse
 
 import frappe
 from frappe import _
@@ -86,7 +86,13 @@ def parse_menu_line(body):
 
 
 def normalize_route(route):
-	return (route or "").strip().lstrip("/")
+	route = (route or "").strip()
+	parsed = urlparse(route)
+	if parsed.path.strip("/") == "help/student-life":
+		source = parse_qs(parsed.query).get("source", [""])[0]
+		return unquote(source).strip().lstrip("/")
+
+	return unquote(route).strip().lstrip("/")
 
 
 def make_help_href(route):

@@ -82,6 +82,9 @@ def get_wiki_sidebar_menu_tree():
 			roots.append(group)
 
 		route = normalize_route(page.get("route"))
+		if not route.startswith("{}/".format(WIKI_SPACE_ROUTE)):
+			continue
+
 		groups[group_label]["children"].append(
 			{
 				"label": page.get("title") or route,

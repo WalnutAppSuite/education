@@ -7,9 +7,8 @@ from frappe import _
 
 no_cache = 1
 
-WIKI_SPACE_ROUTE = "Std-1-to-10"
+MENU_ROUTE = "Std-1-to-10/help-menu-student-life"
 DEFAULT_SOURCE_ROUTE = "Std-1-to-10/what-to-send-with-the-child"
-FILE_ORIGIN = "https://erp.walnutedu.in"
 
 
 def get_context(context):
@@ -17,10 +16,8 @@ def get_context(context):
 	context.title = _("Student Life Help")
 	context.parents = [{"name": _("Home"), "route": "/"}]
 	context.show_sidebar = False
-	context.app_mode = is_app_mode()
-	context.app_query = "&app=1" if context.app_mode else "&app=0"
-	context.menu_page_href = "/help/student-life/menu?app={}".format(1 if context.app_mode else 0)
 
+	context.menu_source_route = MENU_ROUTE
 	context.menu_tree = get_wiki_menu_tree()
 	valid_routes = collect_menu_routes(context.menu_tree)
 	context.selected_source_route = get_selected_source_route(valid_routes)
@@ -33,70 +30,12 @@ def get_context(context):
 
 
 def get_wiki_menu_tree():
-	menu_tree = get_wiki_sidebar_menu_tree()
-	if not menu_tree:
+	menu_page = get_wiki_page_by_route(MENU_ROUTE, fields=["content"])
+	if not menu_page or not menu_page.get("content"):
 		return fallback_menu_tree()
-	return menu_tree
 
-
-def get_wiki_sidebar_menu_tree():
-	"""Build the help menu from the existing Wiki Space sidebar.
-
-	This keeps maintenance in the normal Wiki sidebar/pages instead of a giant
-	secondary markdown index page.
-	"""
-	try:
-		space_name = frappe.db.get_value("Wiki Space", {"route": WIKI_SPACE_ROUTE}, "name")
-		if not space_name:
-			return []
-
-		space = frappe.get_doc("Wiki Space", space_name)
-		items = [item for item in (space.get("wiki_sidebars") or []) if not item.get("hide_on_sidebar")]
-		page_names = [item.get("wiki_page") for item in items if item.get("wiki_page")]
-		if not page_names:
-			return []
-
-		pages = frappe.get_all(
-			"Wiki Page",
-			filters={"name": ["in", page_names], "published": 1, "allow_guest": 1},
-			fields=["name", "title", "route"],
-			limit_page_length=2000,
-		)
-	except Exception:
-		frappe.log_error(frappe.get_traceback(), "Student Life Help: Wiki sidebar menu lookup failed")
-		return []
-
-	pages_by_name = {page.name: page for page in pages if page.get("route")}
-	roots = []
-	groups = {}
-
-	for item in items:
-		page = pages_by_name.get(item.get("wiki_page"))
-		if not page:
-			continue
-
-		group_label = (item.get("parent_label") or _("Student life")).strip()
-		if group_label not in groups:
-			group = {"label": group_label, "route": "", "href": "", "children": [], "active": False, "open": False}
-			groups[group_label] = group
-			roots.append(group)
-
-		route = normalize_route(page.get("route"))
-		if not route.startswith("{}/".format(WIKI_SPACE_ROUTE)):
-			continue
-
-		groups[group_label]["children"].append(
-			{
-				"label": page.get("title") or route,
-				"route": route,
-				"href": make_help_href(route),
-				"children": [],
-				"active": False,
-				"open": False,
-			}
-		)
-
-	return [group for group in roots if group.get("children")]
+	menu_tree = parse_markdown_menu(menu_page.get("content"))
+	return menu_tree or fallback_menu_tree()
 
 
 def parse_markdown_menu(content):
@@ -156,16 +95,8 @@ def normalize_route(route):
 	return unquote(route).strip().lstrip("/")
 
 
-def is_app_mode():
-	return str(frappe.form_dict.get("app") or "0").strip().lower() in ("1", "true", "yes")
-
-
-def make_help_href(route, app_mode=None):
-	if app_mode is None:
-		app_mode = is_app_mode()
-
-	href = "/help/student-life?source={}".format(quote(normalize_route(route), safe=""))
-	return "{}&app={}".format(href, 1 if app_mode else 0)
+def make_help_href(route):
+	return "/help/student-life?source={}".format(quote(normalize_route(route), safe=""))
 
 
 def collect_menu_routes(menu_tree):
@@ -285,7 +216,7 @@ def render_wiki_content(content):
 		return "<p>No content found.</p>"
 
 	if _looks_like_html(content):
-		return rewrite_file_urls(content)
+		return content
 
 	for renderer in (_frappe_markdown, _python_markdown):
 		try:
@@ -293,17 +224,9 @@ def render_wiki_content(content):
 		except Exception:
 			continue
 		if html:
-			return rewrite_file_urls(html)
+			return html
 
-	return rewrite_file_urls("<p>{}</p>".format(escape(content).replace("\n", "<br>\n")))
-
-
-def rewrite_file_urls(html):
-	return re.sub(
-		r'(?P<attr>\s(?:src|href)=["\'])(?P<url>/files/[^"\']+)(?P<quote>["\'])',
-		lambda match: "{}{}{}{}".format(match.group("attr"), FILE_ORIGIN, match.group("url"), match.group("quote")),
-		html or "",
-	)
+	return "<p>{}</p>".format(escape(content).replace("\n", "<br>\n"))
 
 
 def _looks_like_html(content):

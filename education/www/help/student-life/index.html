@@ -3,24 +3,7 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block page_content %}
-<div class="ws-help-page {% if app_mode %}ws-help-app-mode{% else %}ws-help-web-mode{% endif %}" data-app-mode="{% if app_mode %}1{% else %}0{% endif %}">
-	{% macro render_menu_nodes(nodes, level=0) %}
-		{% for node in nodes %}
-			{% if node.children %}
-				<details class="ws-help-row-details {% if level > 0 %}ws-help-row-sub{% endif %} level-{{ level }}" {% if node.open %}open{% endif %}>
-					<summary>{{ node.label }}</summary>
-					<div class="{% if level == 0 %}ws-help-row-children{% else %}ws-help-feature-links{% endif %}">
-						{{ render_menu_nodes(node.children, level + 1) }}
-					</div>
-				</details>
-			{% elif node.href %}
-				<a class="{% if node.active %}active{% endif %}" href="{{ node.href }}">{{ node.label }}</a>
-			{% else %}
-				<div class="ws-help-empty-row">{{ node.label }}</div>
-			{% endif %}
-		{% endfor %}
-	{% endmacro %}
-
+<div class="ws-help-page">
 	<header class="ws-help-hero">
 		<a class="ws-help-brand" href="/" aria-label="Walnut School home">
 			<span class="ws-help-logo-mark" aria-hidden="true">W</span>
@@ -32,19 +15,12 @@
 	</header>
 
 	<div class="ws-help-shell">
-		<aside class="ws-help-menu-card ws-help-phone-menu-card" aria-label="Help topics">
+		<aside class="ws-help-menu-card" aria-label="Help topics">
 			<div class="ws-help-menu-title">Topics</div>
 			<button class="ws-help-menu-trigger" type="button" aria-haspopup="dialog" aria-controls="ws-help-drawer" aria-expanded="false">
 				<span>{{ menu_label }}</span>
 				<span class="ws-help-plus" aria-hidden="true">+</span>
 			</button>
-		</aside>
-
-		<aside class="ws-help-desktop-menu-card" aria-label="Help topics">
-			<div class="ws-help-menu-title">Topics</div>
-			<nav class="ws-help-menu-tree ws-help-desktop-menu-tree" aria-label="Help menu">
-				{{ render_menu_nodes(menu_tree) }}
-			</nav>
 		</aside>
 
 		<main class="ws-help-content" id="main-content">
@@ -78,7 +54,23 @@
 				<button class="ws-help-drawer-close" type="button" aria-label="Close menu">×</button>
 			</div>
 
-			<nav class="ws-help-menu-tree ws-help-drawer-list" aria-label="Help menu">
+			<nav class="ws-help-drawer-list" aria-label="Help menu">
+				{% macro render_menu_nodes(nodes, level=0) %}
+					{% for node in nodes %}
+						{% if node.children %}
+							<details class="ws-help-row-details {% if level > 0 %}ws-help-row-sub{% endif %} level-{{ level }}" {% if node.open %}open{% endif %}>
+								<summary>{{ node.label }}</summary>
+								<div class="{% if level == 0 %}ws-help-row-children{% else %}ws-help-feature-links{% endif %}">
+									{{ render_menu_nodes(node.children, level + 1) }}
+								</div>
+							</details>
+						{% elif node.href %}
+							<a class="{% if node.active %}active{% endif %}" href="{{ node.href }}">{{ node.label }}</a>
+						{% else %}
+							<div class="ws-help-empty-row">{{ node.label }}</div>
+						{% endif %}
+					{% endfor %}
+				{% endmacro %}
 				{{ render_menu_nodes(menu_tree) }}
 			</nav>
 		</div>
@@ -143,19 +135,6 @@
 		color: var(--ws-help-ink);
 		font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 	}
-
-	.ws-help-app-mode .ws-help-hero {
-		display: none;
-	}
-
-	.ws-help-app-mode .ws-help-shell {
-		padding-top: .5rem;
-	}
-
-	.ws-help-app-mode .ws-help-source {
-		display: none;
-	}
-
 
 	.ws-help-hero {
 		width: 100%;
@@ -224,7 +203,6 @@
 	}
 
 	.ws-help-menu-card,
-	.ws-help-desktop-menu-card,
 	.ws-help-content,
 	.ws-help-card {
 		min-width: 0;
@@ -233,7 +211,6 @@
 	}
 
 	.ws-help-menu-card,
-	.ws-help-desktop-menu-card,
 	.ws-help-card {
 		background: var(--ws-help-card);
 		border: 1px solid var(--ws-help-line);
@@ -249,12 +226,6 @@
 		padding: 1rem .85rem 1rem;
 		border-radius: 0 0 6px 6px;
 	}
-
-	.ws-help-desktop-menu-card {
-		display: none;
-		padding: 1rem .85rem;
-	}
-
 
 
 	.ws-help-menu-card.is-stuck {
@@ -529,7 +500,7 @@
 		padding: .45rem 0 .45rem .8rem;
 	}
 
-	.ws-help-menu-tree {
+	.ws-help-drawer-list {
 		border-top: 1px solid #111827;
 	}
 
@@ -579,23 +550,15 @@
 		padding-left: 2.55rem;
 	}
 
-	.ws-help-menu-tree > a,
-	.ws-help-row-children > a,
 	.ws-help-feature-links a {
 		display: block;
-		padding: .72rem 1.25rem .72rem 2.15rem;
+		padding: .72rem 1.25rem .72rem 3.35rem;
 		border-top: 1px solid #eef0f2;
 		color: var(--ws-help-link);
 		font-weight: 700;
 		text-decoration: none;
 	}
 
-	.ws-help-feature-links a {
-		padding-left: 3.35rem;
-	}
-
-	.ws-help-menu-tree > a.active,
-	.ws-help-row-children > a.active,
 	.ws-help-feature-links a.active {
 		color: #048ba8;
 		background: #fff;
@@ -607,15 +570,6 @@
 		font-size: .9rem;
 		background: #fafafa;
 	}
-
-	.ws-help-menu-only-shell {
-		max-width: min(780px, 100vw);
-	}
-
-	.ws-help-menu-page-tree {
-		margin: 0 1rem 1rem;
-	}
-
 
 	body.ws-help-menu-open {
 		overflow: hidden !important;
@@ -632,36 +586,9 @@
 			padding: 1.5rem 1rem 3rem;
 		}
 
-		.ws-help-phone-menu-card {
-			display: none;
-		}
-
-		.ws-help-desktop-menu-card {
-			display: block;
-			position: sticky;
+		.ws-help-menu-card {
 			top: 1rem;
-			align-self: start;
-			max-height: calc(100vh - 2rem);
-			overflow-y: auto;
 			border-radius: 6px;
-		}
-
-		.ws-help-desktop-menu-tree .ws-help-row-details summary {
-			padding-left: .9rem;
-		}
-
-		.ws-help-desktop-menu-tree .ws-help-row-sub > summary {
-			padding-left: 1.45rem;
-		}
-
-		.ws-help-desktop-menu-tree .ws-help-row-children > a,
-		.ws-help-desktop-menu-tree .ws-help-feature-links a {
-			padding-left: 2rem;
-		}
-
-		.ws-help-menu-only-shell {
-			grid-template-columns: minmax(0, 1fr);
-			max-width: 780px;
 		}
 
 		.ws-help-card-header,
@@ -677,8 +604,6 @@
 		const drawer = document.getElementById("ws-help-drawer");
 		const trigger = document.querySelector(".ws-help-menu-trigger");
 		const close = document.querySelector(".ws-help-drawer-close");
-		const page = document.querySelector(".ws-help-page");
-		const appMode = page && page.dataset.appMode === "1";
 		const menuCard = document.querySelector(".ws-help-menu-card");
 		if (!drawer || !trigger || !close || !menuCard) return;
 
@@ -748,7 +673,7 @@
 		}
 
 		function helpHrefForWikiRoute(route) {
-			return "/help/student-life?source=" + encodeURIComponent(route) + "&app=" + (appMode ? "1" : "0");
+			return "/help/student-life?source=" + encodeURIComponent(route);
 		}
 
 		function rewriteInternalWikiLinks() {
@@ -757,17 +682,6 @@
 				if (!route) return;
 				link.setAttribute("href", helpHrefForWikiRoute(route));
 				link.dataset.helpSourceRoute = route;
-			});
-		}
-
-		function rewriteWikiFileImages() {
-			document.querySelectorAll(".ws-help-article img[src]").forEach(function (image) {
-				const rawSrc = image.getAttribute("src") || "";
-				if (rawSrc.startsWith("/files/")) {
-					image.setAttribute("src", "https://erp.walnutedu.in" + rawSrc);
-				} else if (rawSrc.startsWith("files/")) {
-					image.setAttribute("src", "https://erp.walnutedu.in/" + rawSrc);
-				}
 			});
 		}
 
@@ -798,7 +712,6 @@
 		}
 
 		rewriteInternalWikiLinks();
-		rewriteWikiFileImages();
 		enhanceArticleTables();
 		document.addEventListener("click", interceptInternalWikiLinks);
 		measureStickyPoint();

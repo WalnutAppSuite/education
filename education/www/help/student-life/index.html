@@ -572,6 +572,49 @@
 			trigger.focus();
 		}
 
+
+		function wikiRouteFromUrl(href) {
+			if (!href) return "";
+			let url;
+			try {
+				url = new URL(href, window.location.origin);
+			} catch (error) {
+				return "";
+			}
+
+			const host = url.hostname.toLowerCase();
+			const isWalnutWikiHost = host === window.location.hostname.toLowerCase()
+				|| host === "uat.unityedu.tech"
+				|| host === "erp.walnutedu.in";
+			const route = url.pathname.replace(/^\/+/, "");
+			if (!isWalnutWikiHost || !route.startsWith("Std-1-to-10/")) return "";
+			return route;
+		}
+
+		function helpHrefForWikiRoute(route) {
+			return "/help/student-life?source=" + encodeURIComponent(route);
+		}
+
+		function rewriteInternalWikiLinks() {
+			document.querySelectorAll(".ws-help-page a[href]").forEach(function (link) {
+				const route = wikiRouteFromUrl(link.getAttribute("href"));
+				if (!route) return;
+				link.setAttribute("href", helpHrefForWikiRoute(route));
+				link.dataset.helpSourceRoute = route;
+			});
+		}
+
+		function interceptInternalWikiLinks(event) {
+			const link = event.target.closest("a[href]");
+			if (!link || !document.querySelector(".ws-help-page").contains(link)) return;
+			const route = link.dataset.helpSourceRoute || wikiRouteFromUrl(link.getAttribute("href"));
+			if (!route) return;
+			event.preventDefault();
+			window.location.href = helpHrefForWikiRoute(route);
+		}
+
+		rewriteInternalWikiLinks();
+		document.addEventListener("click", interceptInternalWikiLinks);
 		measureStickyPoint();
 		updateStickyMenu();
 		window.addEventListener("scroll", updateStickyMenu, { passive: true });

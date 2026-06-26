@@ -379,6 +379,60 @@
 		vertical-align: top;
 	}
 
+
+	@media (max-width: 640px) {
+		.ws-help-article table.ws-help-mobile-table {
+			display: table;
+			width: 100% !important;
+			max-width: 100% !important;
+			border: 0;
+			overflow: visible;
+		}
+
+		.ws-help-article table.ws-help-mobile-table thead {
+			display: none;
+		}
+
+		.ws-help-article table.ws-help-mobile-table tbody,
+		.ws-help-article table.ws-help-mobile-table tr,
+		.ws-help-article table.ws-help-mobile-table td {
+			display: block;
+			width: 100% !important;
+			max-width: 100% !important;
+		}
+
+		.ws-help-article table.ws-help-mobile-table tr {
+			margin: 0 0 .9rem;
+			border: 1px solid var(--ws-help-line);
+			border-radius: 14px;
+			background: #fff;
+			overflow: hidden;
+		}
+
+		.ws-help-article table.ws-help-mobile-table td {
+			border: 0;
+			border-bottom: 1px solid var(--ws-help-soft-line);
+			padding: .72rem .8rem;
+			text-align: left !important;
+			white-space: normal !important;
+		}
+
+		.ws-help-article table.ws-help-mobile-table td:last-child {
+			border-bottom: 0;
+		}
+
+		.ws-help-article table.ws-help-mobile-table td::before {
+			content: attr(data-label);
+			display: block;
+			margin-bottom: .18rem;
+			color: var(--ws-help-muted);
+			font-size: .72rem;
+			font-weight: 800;
+			letter-spacing: .04em;
+			text-transform: uppercase;
+		}
+	}
+
 	.ws-help-drawer[hidden] {
 		display: none !important;
 	}
@@ -636,7 +690,25 @@
 			window.location.href = helpHrefForWikiRoute(route);
 		}
 
+
+		function enhanceArticleTables() {
+			document.querySelectorAll(".ws-help-article table").forEach(function (table) {
+				const headers = Array.from(table.querySelectorAll("thead th")).map(function (cell) {
+					return (cell.innerText || cell.textContent || "").trim();
+				});
+				if (!headers.length) return;
+				table.classList.add("ws-help-mobile-table");
+				table.querySelectorAll("tbody tr").forEach(function (row) {
+					Array.from(row.children).forEach(function (cell, index) {
+						if (cell.tagName.toLowerCase() !== "td") return;
+						cell.setAttribute("data-label", headers[index] || "");
+					});
+				});
+			});
+		}
+
 		rewriteInternalWikiLinks();
+		enhanceArticleTables();
 		document.addEventListener("click", interceptInternalWikiLinks);
 		measureStickyPoint();
 		updateStickyMenu();

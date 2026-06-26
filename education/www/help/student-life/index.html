@@ -79,15 +79,15 @@
 
 <style>
 	:root {
-		--ws-help-ink: #070b14;
-		--ws-help-muted: #667085;
-		--ws-help-line: #d7dde7;
-		--ws-help-soft-line: #edf0f4;
-		--ws-help-bg: #eef3f8;
+		--ws-help-ink: #111825;
+		--ws-help-muted: #585E6F;
+		--ws-help-line: #D0D7E9;
+		--ws-help-soft-line: #e7edf5;
+		--ws-help-bg: #f2f1f1;
 		--ws-help-card: #ffffff;
-		--ws-help-blue: #4169ff;
-		--ws-help-link: #3f7fa6;
-		--ws-help-shadow: 0 18px 45px rgba(17, 24, 39, 0.08);
+		--ws-help-blue: #2BBAFC;
+		--ws-help-link: #048ba8;
+		--ws-help-shadow: 0 8px 22px rgba(17, 24, 37, 0.06);
 	}
 
 	html,
@@ -139,10 +139,10 @@
 	.ws-help-hero {
 		width: 100%;
 		max-width: 100vw;
-		padding: 1.5rem 1rem 1.85rem;
-		background: linear-gradient(135deg, #f4fbff 0%, #f2fff5 100%);
-		border: 1px solid var(--ws-help-line);
-		border-radius: 6px 6px 0 0;
+		padding: 1.35rem 1rem 1.65rem;
+		background: #ffffff;
+		border-bottom: 1px solid var(--ws-help-line);
+		border-radius: 0;
 	}
 
 	.ws-help-brand {
@@ -159,8 +159,8 @@
 		place-items: center;
 		width: 42px;
 		height: 42px;
-		border-radius: 12px;
-		background: linear-gradient(135deg, #4f8ed8, #4faa61);
+		border-radius: 8px;
+		background: #2BBAFC;
 		color: white;
 		font-weight: 900;
 		font-size: 1.35rem;
@@ -208,9 +208,13 @@
 		min-width: 0;
 		width: 100%;
 		max-width: 100%;
+	}
+
+	.ws-help-menu-card,
+	.ws-help-card {
 		background: var(--ws-help-card);
-		border: 1px solid var(--ws-help-soft-line);
-		border-radius: 20px;
+		border: 1px solid var(--ws-help-line);
+		border-radius: 8px;
 		box-shadow: var(--ws-help-shadow);
 	}
 
@@ -220,7 +224,7 @@
 		z-index: 20;
 		align-self: start;
 		padding: 1.15rem .9rem 1.2rem;
-		border-radius: 0 0 20px 20px;
+		border-radius: 0 0 8px 8px;
 	}
 
 
@@ -234,7 +238,7 @@
 		margin: 0 auto;
 		border-left: 0;
 		border-right: 0;
-		box-shadow: 0 10px 26px rgba(15, 23, 42, .12);
+		box-shadow: 0 6px 16px rgba(17, 24, 37, .09);
 	}
 
 	.ws-help-menu-spacer {
@@ -259,8 +263,8 @@
 		width: 100%;
 		min-height: 56px;
 		padding: 0 .95rem;
-		border: 2px solid #0b0f18;
-		border-radius: 16px;
+		border: 1px solid #111825;
+		border-radius: 8px;
 		background: #fff;
 		color: var(--ws-help-ink);
 		font-weight: 800;
@@ -299,9 +303,9 @@
 	.ws-help-note {
 		margin: 1rem 1rem 0;
 		padding: .9rem 1rem;
-		border-radius: 16px;
-		background: #fff8e6;
-		border: 1px solid #f3d68a;
+		border-radius: 8px;
+		background: #fff9e8;
+		border: 1px solid #EDAE49;
 		color: #7a3f00;
 		font-size: .92rem;
 		line-height: 1.45;
@@ -358,7 +362,7 @@
 		max-width: 100% !important;
 		width: auto !important;
 		height: auto !important;
-		border-radius: 16px;
+		border-radius: 8px;
 	}
 
 	.ws-help-article > div {
@@ -404,7 +408,7 @@
 		.ws-help-article table.ws-help-mobile-table tr {
 			margin: 0 0 .9rem;
 			border: 1px solid var(--ws-help-line);
-			border-radius: 14px;
+			border-radius: 8px;
 			background: #fff;
 			overflow: hidden;
 		}
@@ -451,7 +455,7 @@
 		overflow-y: auto;
 		background: #fff;
 		border: 1px solid #cbd5e1;
-		border-radius: 6px;
+		border-radius: 8px;
 		box-shadow: 0 20px 70px rgba(15, 23, 42, .2);
 	}
 
@@ -471,8 +475,8 @@
 		gap: .15rem;
 		width: 73px;
 		height: 73px;
-		border-radius: 6px;
-		background: linear-gradient(145deg, #5ca5d7, #22377f);
+		border-radius: 8px;
+		background: #111825;
 		color: #fff;
 		text-decoration: none;
 		font-size: .58rem;
@@ -490,7 +494,7 @@
 	.ws-help-drawer-close {
 		border: 0;
 		background: transparent;
-		color: #1f2937;
+		color: #111825;
 		font-size: 2rem;
 		line-height: 1;
 		padding: .45rem 0 .45rem .8rem;
@@ -513,7 +517,7 @@
 		font-size: 1rem;
 		line-height: 1.25;
 		font-weight: 800;
-		color: #07101f;
+		color: #111825;
 		background: #fff;
 	}
 
@@ -556,7 +560,7 @@
 	}
 
 	.ws-help-feature-links a.active {
-		color: #3f7fa6;
+		color: #048ba8;
 		background: #fff;
 	}
 
@@ -584,7 +588,7 @@
 
 		.ws-help-menu-card {
 			top: 1rem;
-			border-radius: 20px;
+			border-radius: 8px;
 		}
 
 		.ws-help-card-header,

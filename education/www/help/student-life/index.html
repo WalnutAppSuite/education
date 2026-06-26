@@ -1,0 +1,347 @@
+{% extends "templates/web.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block page_content %}
+<div class="ws-help-page">
+	<header class="ws-help-hero">
+		<a class="ws-help-brand" href="/" aria-label="Walnut School home">
+			<img src="{{ logo_url }}" alt="Walnut School" onerror="this.style.display='none'">
+			<span>Walnut School Help</span>
+		</a>
+		<p class="ws-help-eyebrow">Simple help for parents and school staff</p>
+		<h1>Student life</h1>
+		<p class="ws-help-intro">Find the most useful school information in a clean mobile view. This prototype reuses existing Wiki content without showing the default Wiki layout.</p>
+	</header>
+
+	<div class="ws-help-shell">
+		<aside class="ws-help-menu" aria-label="Help topics">
+			<div class="ws-help-menu-title">Topics</div>
+			{% macro render_items(items, level=0) %}
+				{% for item in items %}
+					{% if item.items %}
+						<details class="ws-help-accordion level-{{ level }}" {% if item.open %}open{% endif %}>
+							<summary>{{ item.label }}</summary>
+							<div class="ws-help-accordion-body">
+								{{ render_items(item.items, level + 1) }}
+							</div>
+						</details>
+					{% else %}
+						{% if item.route %}
+							<a class="ws-help-leaf {% if item.active %}active{% endif %}" href="/{{ item.route }}">
+								<span>{{ item.label }}</span>
+								{% if item.active %}<small>shown</small>{% endif %}
+							</a>
+						{% else %}
+							<button class="ws-help-leaf muted" type="button" disabled>{{ item.label }}</button>
+						{% endif %}
+					{% endif %}
+				{% endfor %}
+			{% endmacro %}
+			{{ render_items(help_menu) }}
+		</aside>
+
+		<main class="ws-help-content" id="main-content">
+			<div class="ws-help-card">
+				<div class="ws-help-card-header">
+					<p class="ws-help-section-label">Featured article</p>
+					<h2>{{ article.prototype_label or article.title }}</h2>
+					{% if article.route %}
+						<a class="ws-help-source" href="/{{ article.route }}">Source Wiki Page</a>
+					{% endif %}
+				</div>
+
+				{% if article.source_note %}
+					<div class="ws-help-note">{{ article.source_note }}</div>
+				{% endif %}
+
+				<article class="ws-help-article">
+					{{ article_html | safe }}
+				</article>
+			</div>
+		</main>
+	</div>
+</div>
+
+<style>
+	:root {
+		--ws-help-ink: #172033;
+		--ws-help-muted: #667085;
+		--ws-help-line: #e7ecf3;
+		--ws-help-bg: #f6f8fb;
+		--ws-help-card: #ffffff;
+		--ws-help-blue: #1570ef;
+		--ws-help-green: #16a34a;
+		--ws-help-shadow: 0 18px 45px rgba(17, 24, 39, 0.08);
+	}
+
+	body[data-route="help/student-life"] .page_content,
+	body[data-route="help/student-life"] .page-content-wrapper {
+		padding: 0;
+	}
+
+	.ws-help-page {
+		margin: -1rem calc(50% - 50vw) 0;
+		min-height: 100vh;
+		background: var(--ws-help-bg);
+		color: var(--ws-help-ink);
+		font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+	}
+
+	.ws-help-hero {
+		padding: 1rem 1rem 1.4rem;
+		background: linear-gradient(135deg, #eaf4ff 0%, #f2fff5 100%);
+		border-bottom: 1px solid var(--ws-help-line);
+	}
+
+	.ws-help-brand {
+		display: inline-flex;
+		align-items: center;
+		gap: .6rem;
+		text-decoration: none;
+		color: var(--ws-help-ink);
+		font-weight: 800;
+	}
+
+	.ws-help-brand img {
+		width: 42px;
+		height: 42px;
+		border-radius: 12px;
+		object-fit: contain;
+		background: white;
+		box-shadow: 0 8px 18px rgba(21, 112, 239, .14);
+	}
+
+	.ws-help-eyebrow,
+	.ws-help-section-label {
+		margin: 1rem 0 .35rem;
+		color: var(--ws-help-blue);
+		font-weight: 800;
+		font-size: .78rem;
+		letter-spacing: .05em;
+		text-transform: uppercase;
+	}
+
+	.ws-help-hero h1 {
+		margin: 0;
+		font-size: clamp(2rem, 9vw, 3.2rem);
+		line-height: 1.02;
+		letter-spacing: -.04em;
+	}
+
+	.ws-help-intro {
+		margin: .75rem 0 0;
+		max-width: 42rem;
+		color: #475467;
+		font-size: 1rem;
+		line-height: 1.6;
+	}
+
+	.ws-help-shell {
+		display: grid;
+		gap: 1rem;
+		padding: 1rem;
+		max-width: 1180px;
+		margin: 0 auto;
+	}
+
+	.ws-help-menu,
+	.ws-help-card {
+		background: var(--ws-help-card);
+		border: 1px solid var(--ws-help-line);
+		border-radius: 22px;
+		box-shadow: var(--ws-help-shadow);
+	}
+
+	.ws-help-menu {
+		padding: .8rem;
+		position: sticky;
+		top: .75rem;
+		z-index: 1;
+	}
+
+	.ws-help-menu-title {
+		padding: .35rem .55rem .65rem;
+		font-size: .85rem;
+		font-weight: 800;
+		color: var(--ws-help-muted);
+	}
+
+	.ws-help-accordion {
+		margin: .35rem 0;
+	}
+
+	.ws-help-accordion summary {
+		list-style: none;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: .75rem;
+		padding: .85rem .95rem;
+		border-radius: 16px;
+		background: #f8fafc;
+		font-weight: 800;
+		border: 1px solid transparent;
+	}
+
+	.ws-help-accordion summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.ws-help-accordion summary::after {
+		content: "+";
+		font-size: 1.15rem;
+		color: var(--ws-help-blue);
+	}
+
+	.ws-help-accordion[open] > summary {
+		background: #eef6ff;
+		border-color: #cfe4ff;
+	}
+
+	.ws-help-accordion[open] > summary::after {
+		content: "–";
+	}
+
+	.ws-help-accordion-body {
+		padding: .35rem 0 .2rem .55rem;
+		border-left: 2px solid #e6f0fb;
+		margin-left: .7rem;
+	}
+
+	.ws-help-leaf {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: .75rem;
+		width: 100%;
+		margin: .35rem 0;
+		padding: .78rem .9rem;
+		border-radius: 14px;
+		border: 1px solid var(--ws-help-line);
+		background: #fff;
+		color: var(--ws-help-ink);
+		font-weight: 700;
+		text-decoration: none;
+		text-align: left;
+	}
+
+	.ws-help-leaf.active {
+		border-color: #bbf7d0;
+		background: #effdf4;
+		color: #166534;
+	}
+
+	.ws-help-leaf small {
+		font-size: .72rem;
+		color: var(--ws-help-green);
+		text-transform: uppercase;
+		letter-spacing: .06em;
+	}
+
+	.ws-help-leaf.muted {
+		color: #98a2b3;
+		background: #f9fafb;
+	}
+
+	.ws-help-card {
+		overflow: hidden;
+	}
+
+	.ws-help-card-header {
+		padding: 1.2rem 1.2rem .75rem;
+		border-bottom: 1px solid var(--ws-help-line);
+	}
+
+	.ws-help-card-header h2 {
+		margin: 0;
+		font-size: clamp(1.55rem, 7vw, 2.25rem);
+		letter-spacing: -.03em;
+	}
+
+	.ws-help-source {
+		display: inline-flex;
+		margin-top: .6rem;
+		color: var(--ws-help-blue);
+		font-weight: 700;
+		text-decoration: none;
+	}
+
+	.ws-help-note {
+		margin: 1rem 1rem 0;
+		padding: .85rem 1rem;
+		border-radius: 16px;
+		background: #fff8e6;
+		border: 1px solid #fde7aa;
+		color: #7a4b00;
+		font-size: .92rem;
+		line-height: 1.5;
+	}
+
+	.ws-help-article {
+		padding: 1.15rem;
+		font-size: 1rem;
+		line-height: 1.75;
+		color: #344054;
+	}
+
+	.ws-help-article :is(h1, h2, h3, h4) {
+		color: var(--ws-help-ink);
+		line-height: 1.22;
+		margin: 1.25rem 0 .6rem;
+	}
+
+	.ws-help-article :is(p, ul, ol) {
+		margin-bottom: 1rem;
+	}
+
+	.ws-help-article ul,
+	.ws-help-article ol {
+		padding-left: 1.25rem;
+	}
+
+	.ws-help-article li {
+		margin: .45rem 0;
+	}
+
+	.ws-help-article img,
+	.ws-help-article video,
+	.ws-help-article iframe {
+		max-width: 100%;
+		height: auto;
+		border-radius: 16px;
+	}
+
+	.ws-help-article table {
+		display: block;
+		width: 100%;
+		overflow-x: auto;
+		border-collapse: collapse;
+	}
+
+	.ws-help-article :is(th, td) {
+		padding: .65rem;
+		border: 1px solid var(--ws-help-line);
+		vertical-align: top;
+	}
+
+	@media (min-width: 900px) {
+		.ws-help-hero {
+			padding: 2rem max(2rem, calc((100vw - 1180px) / 2)) 2.4rem;
+		}
+
+		.ws-help-shell {
+			grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+			align-items: start;
+			padding: 1.5rem 1rem 3rem;
+		}
+
+		.ws-help-card-header,
+		.ws-help-article {
+			padding-left: 1.6rem;
+			padding-right: 1.6rem;
+		}
+	}
+</style>
+{% endblock %}

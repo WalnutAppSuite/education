@@ -1,15 +1,14 @@
 import re
 from html import escape
+from urllib.parse import quote
 
 import frappe
 from frappe import _
 
 no_cache = 1
 
-SOURCE_ROUTE_CANDIDATES = (
-	"Std-1-to-10/no-school-bag",
-	"Std-1-to-10/what-to-send-with-the-child",
-)
+MENU_ROUTE = "Std-1-to-10/help-menu-student-life"
+DEFAULT_SOURCE_ROUTE = "Std-1-to-10/what-to-send-with-the-child"
 
 
 def get_context(context):
@@ -17,65 +16,169 @@ def get_context(context):
 	context.title = _("Student Life Help")
 	context.parents = [{"name": _("Home"), "route": "/"}]
 	context.show_sidebar = False
-	context.logo_url = "/files/Walnut-Logo-2023.png"
-	context.help_menu = get_help_menu()
-	context.article = get_wiki_article()
+
+	context.menu_source_route = MENU_ROUTE
+	context.menu_tree = get_wiki_menu_tree()
+	valid_routes = collect_menu_routes(context.menu_tree)
+	context.selected_source_route = get_selected_source_route(valid_routes)
+	mark_active_menu(context.menu_tree, context.selected_source_route)
+	context.menu_label = get_active_top_label(context.menu_tree) or _("Student life")
+
+	context.article = get_wiki_article(context.selected_source_route)
 	context.article_html = render_wiki_content(context.article.get("content") or "")
 	return context
 
 
-def get_help_menu():
-	"""Hardcoded MVP menu. Move this to a DocType when the prototype is accepted."""
+def get_wiki_menu_tree():
+	menu_page = get_wiki_page_by_route(MENU_ROUTE, fields=["content"])
+	if not menu_page or not menu_page.get("content"):
+		return fallback_menu_tree()
+
+	menu_tree = parse_markdown_menu(menu_page.get("content"))
+	return menu_tree or fallback_menu_tree()
+
+
+def parse_markdown_menu(content):
+	"""Parse an indented markdown bullet list into an N-level menu tree."""
+	roots = []
+	stack = []
+
+	for raw_line in (content or "").splitlines():
+		if not raw_line.strip():
+			continue
+
+		match = re.match(r"^(\s*)-\s+(.+?)\s*$", raw_line.expandtabs(2))
+		if not match:
+			continue
+
+		indent, body = match.groups()
+		level = len(indent) // 2
+		node = parse_menu_line(body)
+
+		while stack and stack[-1][0] >= level:
+			stack.pop()
+
+		if stack:
+			stack[-1][1]["children"].append(node)
+		else:
+			roots.append(node)
+
+		stack.append((level, node))
+
+	return roots
+
+
+def parse_menu_line(body):
+	link = re.match(r"^\[([^\]]+)\]\(([^)]+)\)$", body.strip())
+	if link:
+		label, route = link.groups()
+		route = normalize_route(route)
+		return {
+			"label": label.strip(),
+			"route": route,
+			"href": make_help_href(route),
+			"children": [],
+			"active": False,
+			"open": False,
+		}
+
+	return {"label": body.strip(), "route": "", "href": "", "children": [], "active": False, "open": False}
+
+
+def normalize_route(route):
+	return (route or "").strip().lstrip("/")
+
+
+def make_help_href(route):
+	return "/help/student-life?source={}".format(quote(normalize_route(route), safe=""))
+
+
+def collect_menu_routes(menu_tree):
+	routes = []
+
+	def walk(nodes):
+		for node in nodes:
+			if node.get("route"):
+				routes.append(node.get("route"))
+			walk(node.get("children") or [])
+
+	walk(menu_tree or [])
+	return routes
+
+
+def get_selected_source_route(valid_routes):
+	valid_routes = valid_routes or []
+	requested = normalize_route(frappe.form_dict.get("source"))
+
+	if requested in valid_routes:
+		return requested
+	if DEFAULT_SOURCE_ROUTE in valid_routes:
+		return DEFAULT_SOURCE_ROUTE
+	return valid_routes[0] if valid_routes else DEFAULT_SOURCE_ROUTE
+
+
+def mark_active_menu(menu_tree, selected_route):
+	def walk(nodes):
+		matched = False
+		for node in nodes:
+			child_matched = walk(node.get("children") or [])
+			self_matched = bool(node.get("route") and node.get("route") == selected_route)
+			node["active"] = self_matched
+			node["open"] = self_matched or child_matched
+			matched = matched or node["open"]
+		return matched
+
+	walk(menu_tree or [])
+
+
+def get_active_top_label(menu_tree):
+	for node in menu_tree or []:
+		if node.get("open") or node.get("active"):
+			return node.get("label")
+	return None
+
+
+def fallback_menu_tree():
 	return [
 		{
 			"label": _("Student life"),
+			"route": "",
+			"href": "",
+			"active": False,
 			"open": True,
-			"items": [
+			"children": [
 				{
-					"label": _("Exciting features"),
+					"label": _("Daily routine"),
+					"route": "",
+					"href": "",
+					"active": False,
 					"open": True,
-					"items": [
+					"children": [
 						{
-							"label": _("No School Bag"),
+							"label": _("What to send with the child"),
+							"route": DEFAULT_SOURCE_ROUTE,
+							"href": make_help_href(DEFAULT_SOURCE_ROUTE),
+							"children": [],
 							"active": True,
-							"route": "Std-1-to-10/what-to-send-with-the-child",
-						},
-						{"label": _("Subject wise rooms"), "route": "Std-1-to-10/subject-wise-classroom"},
-						{"label": _("Balanced routine"), "route": "Std-1-to-10/daily-routine-walnut-school"},
-						{"label": _("Daily sports"), "route": "Std-1-to-10/walnut-sports-leagues-updates"},
-						{"label": _("Uniform"), "route": "Std-1-to-10/school-uniform"},
-						{"label": _("Events"), "route": "Std-1-to-10/electric-saturday-events-walnut-school"},
+							"open": True,
+						}
 					],
-				},
-				{"label": _("Core subjects")},
-				{"label": _("Co-curriculars")},
-				{"label": _("Learning system")},
-				{"label": _("Cultural Connect")},
-				{"label": _("Examinations")},
-				{"label": _("Events")},
+				}
 			],
 		}
 	]
 
 
-def get_wiki_article():
+def get_wiki_article(route):
 	fields = ["name", "title", "route", "content", "published", "allow_guest"]
-	filters_common = {"published": 1, "allow_guest": 1}
-
-	for route in SOURCE_ROUTE_CANDIDATES:
-		article = _get_first_wiki_page({**filters_common, "route": route}, fields)
-		if article:
-			if route != "Std-1-to-10/no-school-bag":
-				article["prototype_label"] = _("No School Bag")
-				article["source_note"] = _(
-					"Prototype note: a dedicated 'No School Bag' Wiki Page was not found, so this MVP shows the closest existing article."
-				)
-			return article
-
-	article = _get_first_wiki_page({**filters_common, "route": ["like", "Std-1-to-10/%"]}, fields)
+	article = get_wiki_page_by_route(route, fields=fields)
 	if article:
-		article["source_note"] = _("Showing the first available published Std-1-to-10 Wiki Page.")
 		return article
+
+	fallback = get_wiki_page_by_route(DEFAULT_SOURCE_ROUTE, fields=fields)
+	if fallback:
+		fallback["source_note"] = _("Showing the default help article because the selected Wiki Page was not found.")
+		return fallback
 
 	return {
 		"title": _("Student Life"),
@@ -85,9 +188,15 @@ def get_wiki_article():
 	}
 
 
-def _get_first_wiki_page(filters, fields):
+def get_wiki_page_by_route(route, fields=None):
+	fields = fields or ["name", "title", "route", "content"]
 	try:
-		rows = frappe.get_all("Wiki Page", filters=filters, fields=fields, limit_page_length=1)
+		rows = frappe.get_all(
+			"Wiki Page",
+			filters={"route": normalize_route(route), "published": 1, "allow_guest": 1},
+			fields=fields,
+			limit_page_length=1,
+		)
 	except Exception:
 		frappe.log_error(frappe.get_traceback(), "Student Life Help: Wiki Page lookup failed")
 		return None

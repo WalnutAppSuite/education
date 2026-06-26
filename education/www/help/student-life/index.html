@@ -18,7 +18,7 @@
 		<aside class="ws-help-menu-card" aria-label="Help topics">
 			<div class="ws-help-menu-title">Topics</div>
 			<button class="ws-help-menu-trigger" type="button" aria-haspopup="dialog" aria-controls="ws-help-drawer" aria-expanded="false">
-				<span>Student life</span>
+				<span>{{ menu_label }}</span>
 				<span class="ws-help-plus" aria-hidden="true">+</span>
 			</button>
 		</aside>
@@ -55,29 +55,23 @@
 			</div>
 
 			<nav class="ws-help-drawer-list" aria-label="Help menu">
-				<details class="ws-help-row-details" open>
-					<summary>Student life</summary>
-					<div class="ws-help-row-children">
-						<details class="ws-help-row-details ws-help-row-sub" open>
-							<summary>Exciting features</summary>
-							<div class="ws-help-feature-links">
-								<a class="active" href="/help/student-life">No School Bag</a>
-								<a href="/Std-1-to-10/subject-wise-classroom">Subject wise rooms</a>
-								<a href="/Std-1-to-10/daily-routine-walnut-school">Balanced routine</a>
-								<a href="/Std-1-to-10/walnut-sports-leagues-updates">Daily sports</a>
-								<a href="/Std-1-to-10/school-uniform">Uniform</a>
-								<a href="/Std-1-to-10/electric-saturday-events-walnut-school">Events</a>
-							</div>
-						</details>
-					</div>
-				</details>
-
-				{% for label in ["Core subjects", "Co-curriculars", "Learning system", "Cultural Connect", "Examinations", "Events", "Parent comfort", "Kindergarten", "Admission", "Achievements"] %}
-					<details class="ws-help-row-details">
-						<summary>{{ label }}</summary>
-						<div class="ws-help-empty-row">More links can be added here later.</div>
-					</details>
-				{% endfor %}
+				{% macro render_menu_nodes(nodes, level=0) %}
+					{% for node in nodes %}
+						{% if node.children %}
+							<details class="ws-help-row-details {% if level > 0 %}ws-help-row-sub{% endif %} level-{{ level }}" {% if node.open %}open{% endif %}>
+								<summary>{{ node.label }}</summary>
+								<div class="{% if level == 0 %}ws-help-row-children{% else %}ws-help-feature-links{% endif %}">
+									{{ render_menu_nodes(node.children, level + 1) }}
+								</div>
+							</details>
+						{% elif node.href %}
+							<a class="{% if node.active %}active{% endif %}" href="{{ node.href }}">{{ node.label }}</a>
+						{% else %}
+							<div class="ws-help-empty-row">{{ node.label }}</div>
+						{% endif %}
+					{% endfor %}
+				{% endmacro %}
+				{{ render_menu_nodes(menu_tree) }}
 			</nav>
 		</div>
 	</div>

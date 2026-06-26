@@ -6,7 +6,7 @@
 <div class="ws-help-page">
 	<header class="ws-help-hero">
 		<a class="ws-help-brand" href="/" aria-label="Walnut School home">
-			<img src="{{ logo_url }}" alt="Walnut School" onerror="this.style.display='none'">
+			<span class="ws-help-logo-mark" aria-hidden="true">W</span>
 			<span>Walnut School Help</span>
 		</a>
 		<p class="ws-help-eyebrow">Simple help for parents and school staff</p>
@@ -80,9 +80,17 @@
 		padding: 0;
 	}
 
+	.ws-help-page,
+	.ws-help-page * {
+		box-sizing: border-box;
+	}
+
 	.ws-help-page {
-		margin: -1rem calc(50% - 50vw) 0;
+		margin: 0;
+		width: 100%;
+		max-width: 100%;
 		min-height: 100vh;
+		overflow-x: hidden;
 		background: var(--ws-help-bg);
 		color: var(--ws-help-ink);
 		font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -103,13 +111,17 @@
 		font-weight: 800;
 	}
 
-	.ws-help-brand img {
+	.ws-help-logo-mark {
+		display: inline-grid;
+		place-items: center;
 		width: 42px;
 		height: 42px;
-		border-radius: 12px;
-		object-fit: contain;
-		background: white;
-		box-shadow: 0 8px 18px rgba(21, 112, 239, .14);
+		border-radius: 14px;
+		background: linear-gradient(135deg, #1570ef, #16a34a);
+		color: white;
+		font-weight: 900;
+		font-size: 1.35rem;
+		box-shadow: 0 8px 18px rgba(21, 112, 239, .18);
 	}
 
 	.ws-help-eyebrow,

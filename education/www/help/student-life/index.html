@@ -685,6 +685,17 @@
 			});
 		}
 
+		function rewriteWikiFileImages() {
+			document.querySelectorAll(".ws-help-article img[src]").forEach(function (image) {
+				const rawSrc = image.getAttribute("src") || "";
+				if (rawSrc.startsWith("/files/")) {
+					image.setAttribute("src", "https://erp.walnutedu.in" + rawSrc);
+				} else if (rawSrc.startsWith("files/")) {
+					image.setAttribute("src", "https://erp.walnutedu.in/" + rawSrc);
+				}
+			});
+		}
+
 		function interceptInternalWikiLinks(event) {
 			const link = event.target.closest("a[href]");
 			if (!link || !document.querySelector(".ws-help-page").contains(link)) return;
@@ -712,6 +723,7 @@
 		}
 
 		rewriteInternalWikiLinks();
+		rewriteWikiFileImages();
 		enhanceArticleTables();
 		document.addEventListener("click", interceptInternalWikiLinks);
 		measureStickyPoint();

@@ -7,8 +7,9 @@ from frappe import _
 
 no_cache = 1
 
-MENU_ROUTE = "Std-1-to-10/help-menu-student-life"
+WIKI_SPACE_ROUTE = "Std-1-to-10"
 DEFAULT_SOURCE_ROUTE = "Std-1-to-10/what-to-send-with-the-child"
+FILE_ORIGIN = "https://erp.walnutedu.in"
 
 
 def get_context(context):
@@ -17,7 +18,6 @@ def get_context(context):
 	context.parents = [{"name": _("Home"), "route": "/"}]
 	context.show_sidebar = False
 
-	context.menu_source_route = MENU_ROUTE
 	context.menu_tree = get_wiki_menu_tree()
 	valid_routes = collect_menu_routes(context.menu_tree)
 	context.selected_source_route = get_selected_source_route(valid_routes)
@@ -30,12 +30,67 @@ def get_context(context):
 
 
 def get_wiki_menu_tree():
-	menu_page = get_wiki_page_by_route(MENU_ROUTE, fields=["content"])
-	if not menu_page or not menu_page.get("content"):
+	menu_tree = get_wiki_sidebar_menu_tree()
+	if not menu_tree:
 		return fallback_menu_tree()
+	return menu_tree
 
-	menu_tree = parse_markdown_menu(menu_page.get("content"))
-	return menu_tree or fallback_menu_tree()
+
+def get_wiki_sidebar_menu_tree():
+	"""Build the help menu from the existing Wiki Space sidebar.
+
+	This keeps maintenance in the normal Wiki sidebar/pages instead of a giant
+	secondary markdown index page.
+	"""
+	try:
+		space_name = frappe.db.get_value("Wiki Space", {"route": WIKI_SPACE_ROUTE}, "name")
+		if not space_name:
+			return []
+
+		space = frappe.get_doc("Wiki Space", space_name)
+		items = [item for item in (space.get("wiki_sidebars") or []) if not item.get("hide_on_sidebar")]
+		page_names = [item.get("wiki_page") for item in items if item.get("wiki_page")]
+		if not page_names:
+			return []
+
+		pages = frappe.get_all(
+			"Wiki Page",
+			filters={"name": ["in", page_names], "published": 1, "allow_guest": 1},
+			fields=["name", "title", "route"],
+			limit_page_length=2000,
+		)
+	except Exception:
+		frappe.log_error(frappe.get_traceback(), "Student Life Help: Wiki sidebar menu lookup failed")
+		return []
+
+	pages_by_name = {page.name: page for page in pages if page.get("route")}
+	roots = []
+	groups = {}
+
+	for item in items:
+		page = pages_by_name.get(item.get("wiki_page"))
+		if not page:
+			continue
+
+		group_label = (item.get("parent_label") or _("Student life")).strip()
+		if group_label not in groups:
+			group = {"label": group_label, "route": "", "href": "", "children": [], "active": False, "open": False}
+			groups[group_label] = group
+			roots.append(group)
+
+		route = normalize_route(page.get("route"))
+		groups[group_label]["children"].append(
+			{
+				"label": page.get("title") or route,
+				"route": route,
+				"href": make_help_href(route),
+				"children": [],
+				"active": False,
+				"open": False,
+			}
+		)
+
+	return [group for group in roots if group.get("children")]
 
 
 def parse_markdown_menu(content):
@@ -216,7 +271,7 @@ def render_wiki_content(content):
 		return "<p>No content found.</p>"
 
 	if _looks_like_html(content):
-		return content
+		return rewrite_file_urls(content)
 
 	for renderer in (_frappe_markdown, _python_markdown):
 		try:
@@ -224,9 +279,17 @@ def render_wiki_content(content):
 		except Exception:
 			continue
 		if html:
-			return html
+			return rewrite_file_urls(html)
 
-	return "<p>{}</p>".format(escape(content).replace("\n", "<br>\n"))
+	return rewrite_file_urls("<p>{}</p>".format(escape(content).replace("\n", "<br>\n")))
+
+
+def rewrite_file_urls(html):
+	return re.sub(
+		r'(?P<attr>\s(?:src|href)=["\'])(?P<url>/files/[^"\']+)(?P<quote>["\'])',
+		lambda match: "{}{}{}{}".format(match.group("attr"), FILE_ORIGIN, match.group("url"), match.group("quote")),
+		html or "",
+	)
 
 
 def _looks_like_html(content):

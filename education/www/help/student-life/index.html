@@ -226,6 +226,28 @@
 		border-radius: 0 0 20px 20px;
 	}
 
+
+	.ws-help-menu-card.is-stuck {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		width: 100vw;
+		max-width: 100vw;
+		margin: 0 auto;
+		border-left: 0;
+		border-right: 0;
+		box-shadow: 0 10px 26px rgba(15, 23, 42, .12);
+	}
+
+	.ws-help-menu-spacer {
+		display: none;
+	}
+
+	.ws-help-menu-spacer.active {
+		display: block;
+	}
+
 	.ws-help-menu-title {
 		padding: 0 .45rem .8rem;
 		font-size: .82rem;
@@ -507,7 +529,40 @@
 		const drawer = document.getElementById("ws-help-drawer");
 		const trigger = document.querySelector(".ws-help-menu-trigger");
 		const close = document.querySelector(".ws-help-drawer-close");
-		if (!drawer || !trigger || !close) return;
+		const menuCard = document.querySelector(".ws-help-menu-card");
+		if (!drawer || !trigger || !close || !menuCard) return;
+
+		const spacer = document.createElement("div");
+		spacer.className = "ws-help-menu-spacer";
+		menuCard.after(spacer);
+
+		let stickyPoint = 0;
+
+		function measureStickyPoint() {
+			menuCard.classList.remove("is-stuck");
+			spacer.classList.remove("active");
+			spacer.style.height = "0px";
+			stickyPoint = menuCard.getBoundingClientRect().top + window.scrollY;
+		}
+
+		function updateStickyMenu() {
+			if (window.matchMedia("(min-width: 900px)").matches) {
+				menuCard.classList.remove("is-stuck");
+				spacer.classList.remove("active");
+				return;
+			}
+
+			const shouldStick = window.scrollY >= stickyPoint;
+			if (shouldStick && !menuCard.classList.contains("is-stuck")) {
+				spacer.style.height = menuCard.offsetHeight + "px";
+				spacer.classList.add("active");
+				menuCard.classList.add("is-stuck");
+			} else if (!shouldStick && menuCard.classList.contains("is-stuck")) {
+				menuCard.classList.remove("is-stuck");
+				spacer.classList.remove("active");
+				spacer.style.height = "0px";
+			}
+		}
 
 		function openMenu() {
 			drawer.hidden = false;
@@ -522,6 +577,14 @@
 			trigger.setAttribute("aria-expanded", "false");
 			trigger.focus();
 		}
+
+		measureStickyPoint();
+		updateStickyMenu();
+		window.addEventListener("scroll", updateStickyMenu, { passive: true });
+		window.addEventListener("resize", function () {
+			measureStickyPoint();
+			updateStickyMenu();
+		});
 
 		trigger.addEventListener("click", openMenu);
 		close.addEventListener("click", closeMenu);

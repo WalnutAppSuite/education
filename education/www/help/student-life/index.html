@@ -15,30 +15,12 @@
 	</header>
 
 	<div class="ws-help-shell">
-		<aside class="ws-help-menu" aria-label="Help topics">
+		<aside class="ws-help-menu-card" aria-label="Help topics">
 			<div class="ws-help-menu-title">Topics</div>
-			{% macro render_items(items, level=0) %}
-				{% for item in items %}
-					{% if item.items %}
-						<details class="ws-help-accordion level-{{ level }}" {% if item.open %}open{% endif %}>
-							<summary>{{ item.label }}</summary>
-							<div class="ws-help-accordion-body">
-								{{ render_items(item.items, level + 1) }}
-							</div>
-						</details>
-					{% else %}
-						{% if item.route %}
-							<a class="ws-help-leaf {% if item.active %}active{% endif %}" href="/{{ item.route }}">
-								<span>{{ item.label }}</span>
-								{% if item.active %}<small>shown</small>{% endif %}
-							</a>
-						{% else %}
-							<button class="ws-help-leaf muted" type="button" disabled>{{ item.label }}</button>
-						{% endif %}
-					{% endif %}
-				{% endfor %}
-			{% endmacro %}
-			{{ render_items(help_menu) }}
+			<button class="ws-help-menu-trigger" type="button" aria-haspopup="dialog" aria-controls="ws-help-drawer" aria-expanded="false">
+				<span>Student life</span>
+				<span class="ws-help-plus" aria-hidden="true">+</span>
+			</button>
 		</aside>
 
 		<main class="ws-help-content" id="main-content">
@@ -61,17 +43,56 @@
 			</div>
 		</main>
 	</div>
+
+	<div class="ws-help-drawer" id="ws-help-drawer" role="dialog" aria-modal="true" aria-label="Student life help menu" hidden>
+		<div class="ws-help-drawer-panel">
+			<div class="ws-help-drawer-head">
+				<a class="ws-help-drawer-logo" href="/" aria-label="Walnut School home">
+					<span class="ws-help-logo-emblem" aria-hidden="true">⌁</span>
+					<span>WALNUT<br>SCHOOL</span>
+				</a>
+				<button class="ws-help-drawer-close" type="button" aria-label="Close menu">×</button>
+			</div>
+
+			<nav class="ws-help-drawer-list" aria-label="Help menu">
+				<details class="ws-help-row-details" open>
+					<summary>Student life</summary>
+					<div class="ws-help-row-children">
+						<details class="ws-help-row-details ws-help-row-sub" open>
+							<summary>Exciting features</summary>
+							<div class="ws-help-feature-links">
+								<a class="active" href="/help/student-life">No School Bag</a>
+								<a href="/Std-1-to-10/subject-wise-classroom">Subject wise rooms</a>
+								<a href="/Std-1-to-10/daily-routine-walnut-school">Balanced routine</a>
+								<a href="/Std-1-to-10/walnut-sports-leagues-updates">Daily sports</a>
+								<a href="/Std-1-to-10/school-uniform">Uniform</a>
+								<a href="/Std-1-to-10/electric-saturday-events-walnut-school">Events</a>
+							</div>
+						</details>
+					</div>
+				</details>
+
+				{% for label in ["Core subjects", "Co-curriculars", "Learning system", "Cultural Connect", "Examinations", "Events", "Parent comfort", "Kindergarten", "Admission", "Achievements"] %}
+					<details class="ws-help-row-details">
+						<summary>{{ label }}</summary>
+						<div class="ws-help-empty-row">More links can be added here later.</div>
+					</details>
+				{% endfor %}
+			</nav>
+		</div>
+	</div>
 </div>
 
 <style>
 	:root {
-		--ws-help-ink: #172033;
+		--ws-help-ink: #070b14;
 		--ws-help-muted: #667085;
-		--ws-help-line: #e7ecf3;
-		--ws-help-bg: #f6f8fb;
+		--ws-help-line: #d7dde7;
+		--ws-help-soft-line: #edf0f4;
+		--ws-help-bg: #eef3f8;
 		--ws-help-card: #ffffff;
-		--ws-help-blue: #1570ef;
-		--ws-help-green: #16a34a;
+		--ws-help-blue: #4169ff;
+		--ws-help-link: #3f7fa6;
 		--ws-help-shadow: 0 18px 45px rgba(17, 24, 39, 0.08);
 	}
 
@@ -119,15 +140,16 @@
 	.ws-help-hero {
 		width: 100%;
 		max-width: 100vw;
-		padding: 1rem 1rem 1.4rem;
-		background: linear-gradient(135deg, #eaf4ff 0%, #f2fff5 100%);
-		border-bottom: 1px solid var(--ws-help-line);
+		padding: 1.5rem 1rem 1.85rem;
+		background: linear-gradient(135deg, #f4fbff 0%, #f2fff5 100%);
+		border: 1px solid var(--ws-help-line);
+		border-radius: 6px 6px 0 0;
 	}
 
 	.ws-help-brand {
 		display: inline-flex;
 		align-items: center;
-		gap: .6rem;
+		gap: .7rem;
 		text-decoration: none;
 		color: var(--ws-help-ink);
 		font-weight: 800;
@@ -138,8 +160,8 @@
 		place-items: center;
 		width: 42px;
 		height: 42px;
-		border-radius: 14px;
-		background: linear-gradient(135deg, #1570ef, #16a34a);
+		border-radius: 12px;
+		background: linear-gradient(135deg, #4f8ed8, #4faa61);
 		color: white;
 		font-weight: 900;
 		font-size: 1.35rem;
@@ -148,141 +170,78 @@
 
 	.ws-help-eyebrow,
 	.ws-help-section-label {
-		margin: 1rem 0 .35rem;
+		margin: 1.15rem 0 .4rem;
 		color: var(--ws-help-blue);
 		font-weight: 800;
 		font-size: .78rem;
-		letter-spacing: .05em;
+		letter-spacing: .045em;
 		text-transform: uppercase;
 	}
 
 	.ws-help-hero h1 {
 		margin: 0;
-		font-size: clamp(2rem, 9vw, 3.2rem);
+		font-size: clamp(2.15rem, 9vw, 3.35rem);
 		line-height: 1.02;
-		letter-spacing: -.04em;
+		letter-spacing: -.055em;
 	}
 
 	.ws-help-intro {
-		margin: .75rem 0 0;
-		max-width: 42rem;
-		color: #475467;
+		margin: .8rem 0 0;
+		max-width: 38rem;
+		color: #2f3b4e;
 		font-size: 1rem;
-		line-height: 1.6;
+		line-height: 1.55;
 	}
 
 	.ws-help-shell {
 		display: grid;
-		gap: .85rem;
+		gap: .9rem;
 		width: 100%;
 		max-width: min(1180px, 100vw);
 		padding: .75rem;
 		margin: 0 auto;
 	}
 
-	.ws-help-menu,
+	.ws-help-menu-card,
 	.ws-help-card {
 		width: 100%;
 		max-width: 100%;
 		background: var(--ws-help-card);
-		border: 1px solid var(--ws-help-line);
-		border-radius: 22px;
+		border: 1px solid var(--ws-help-soft-line);
+		border-radius: 20px;
 		box-shadow: var(--ws-help-shadow);
 	}
 
-	.ws-help-menu {
-		padding: .8rem;
-		position: sticky;
-		top: .75rem;
-		z-index: 1;
+	.ws-help-menu-card {
+		padding: 1.15rem .9rem 1.2rem;
 	}
 
 	.ws-help-menu-title {
-		padding: .35rem .55rem .65rem;
-		font-size: .85rem;
+		padding: 0 .45rem .8rem;
+		font-size: .82rem;
 		font-weight: 800;
-		color: var(--ws-help-muted);
+		color: #667085;
 	}
 
-	.ws-help-accordion {
-		margin: .35rem 0;
-	}
-
-	.ws-help-accordion summary {
-		list-style: none;
-		cursor: pointer;
+	.ws-help-menu-trigger {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		gap: .75rem;
-		padding: .85rem .95rem;
-		border-radius: 16px;
-		background: #f8fafc;
-		font-weight: 800;
-		border: 1px solid transparent;
-	}
-
-	.ws-help-accordion summary::-webkit-details-marker {
-		display: none;
-	}
-
-	.ws-help-accordion summary::after {
-		content: "+";
-		font-size: 1.15rem;
-		color: var(--ws-help-blue);
-	}
-
-	.ws-help-accordion[open] > summary {
-		background: #eef6ff;
-		border-color: #cfe4ff;
-	}
-
-	.ws-help-accordion[open] > summary::after {
-		content: "–";
-	}
-
-	.ws-help-accordion-body {
-		max-width: 100%;
-		padding: .35rem 0 .2rem .35rem;
-		border-left: 2px solid #e6f0fb;
-		margin-left: .35rem;
-	}
-
-	.ws-help-leaf {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: .75rem;
 		width: 100%;
-		max-width: 100%;
-		min-width: 0;
-		margin: .35rem 0;
-		padding: .78rem .9rem;
-		border-radius: 14px;
-		border: 1px solid var(--ws-help-line);
+		min-height: 56px;
+		padding: 0 .95rem;
+		border: 2px solid #0b0f18;
+		border-radius: 16px;
 		background: #fff;
 		color: var(--ws-help-ink);
-		font-weight: 700;
-		text-decoration: none;
+		font-weight: 800;
 		text-align: left;
 	}
 
-	.ws-help-leaf.active {
-		border-color: #bbf7d0;
-		background: #effdf4;
-		color: #166534;
-	}
-
-	.ws-help-leaf small {
-		font-size: .72rem;
-		color: var(--ws-help-green);
-		text-transform: uppercase;
-		letter-spacing: .06em;
-	}
-
-	.ws-help-leaf.muted {
-		color: #98a2b3;
-		background: #f9fafb;
+	.ws-help-plus {
+		color: var(--ws-help-blue);
+		font-size: 1.2rem;
+		line-height: 1;
 	}
 
 	.ws-help-card {
@@ -290,46 +249,51 @@
 	}
 
 	.ws-help-card-header {
-		padding: 1.2rem 1.2rem .75rem;
+		padding: 1.55rem 1.2rem .85rem;
 		border-bottom: 1px solid var(--ws-help-line);
 	}
 
 	.ws-help-card-header h2 {
 		margin: 0;
 		font-size: clamp(1.55rem, 7vw, 2.25rem);
-		letter-spacing: -.03em;
+		letter-spacing: -.04em;
 	}
 
 	.ws-help-source {
 		display: inline-flex;
-		margin-top: .6rem;
+		margin-top: .65rem;
 		color: var(--ws-help-blue);
-		font-weight: 700;
+		font-weight: 800;
 		text-decoration: none;
 	}
 
 	.ws-help-note {
 		margin: 1rem 1rem 0;
-		padding: .85rem 1rem;
+		padding: .9rem 1rem;
 		border-radius: 16px;
 		background: #fff8e6;
-		border: 1px solid #fde7aa;
-		color: #7a4b00;
+		border: 1px solid #f3d68a;
+		color: #7a3f00;
 		font-size: .92rem;
-		line-height: 1.5;
+		line-height: 1.45;
 	}
 
 	.ws-help-article {
 		padding: 1.15rem;
 		font-size: 1rem;
 		line-height: 1.75;
-		color: #344054;
+		color: #243044;
 	}
 
 	.ws-help-article :is(h1, h2, h3, h4) {
 		color: var(--ws-help-ink);
 		line-height: 1.22;
 		margin: 1.25rem 0 .6rem;
+	}
+
+	.ws-help-article h3 {
+		color: #5a92d8;
+		font-weight: 850;
 	}
 
 	.ws-help-article :is(p, ul, ol) {
@@ -366,6 +330,144 @@
 		vertical-align: top;
 	}
 
+	.ws-help-drawer[hidden] {
+		display: none !important;
+	}
+
+	.ws-help-drawer {
+		position: fixed;
+		inset: 0;
+		z-index: 9999;
+		background: rgba(15, 23, 42, .22);
+	}
+
+	.ws-help-drawer-panel {
+		width: min(100vw, 430px);
+		height: 100dvh;
+		max-height: 100dvh;
+		overflow-y: auto;
+		background: #fff;
+		border: 1px solid #cbd5e1;
+		border-radius: 6px;
+		box-shadow: 0 20px 70px rgba(15, 23, 42, .2);
+	}
+
+	.ws-help-drawer-head {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		padding: .75rem 1.25rem 1.9rem;
+		border-bottom: 1px solid #e5e7eb;
+	}
+
+	.ws-help-drawer-logo {
+		display: inline-flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: .15rem;
+		width: 73px;
+		height: 73px;
+		border-radius: 6px;
+		background: linear-gradient(145deg, #5ca5d7, #22377f);
+		color: #fff;
+		text-decoration: none;
+		font-size: .58rem;
+		font-weight: 900;
+		line-height: 1.05;
+		letter-spacing: .04em;
+		text-align: center;
+	}
+
+	.ws-help-logo-emblem {
+		font-size: 1.2rem;
+		line-height: 1;
+	}
+
+	.ws-help-drawer-close {
+		border: 0;
+		background: transparent;
+		color: #1f2937;
+		font-size: 2rem;
+		line-height: 1;
+		padding: .45rem 0 .45rem .8rem;
+	}
+
+	.ws-help-drawer-list {
+		border-top: 1px solid #111827;
+	}
+
+	.ws-help-row-details {
+		border-bottom: 1px solid #e8eaef;
+	}
+
+	.ws-help-row-details summary {
+		position: relative;
+		list-style: none;
+		cursor: pointer;
+		padding: .78rem 2.9rem .78rem 1.25rem;
+		min-height: 46px;
+		font-size: 1rem;
+		line-height: 1.25;
+		font-weight: 800;
+		color: #07101f;
+		background: #fff;
+	}
+
+	.ws-help-row-details summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.ws-help-row-details summary::after {
+		content: "⌄";
+		position: absolute;
+		right: 1rem;
+		top: 50%;
+		transform: translateY(-50%);
+		font-size: 1.1rem;
+		font-weight: 400;
+		color: #111827;
+	}
+
+	.ws-help-row-details[open] > summary::after {
+		content: "⌃";
+	}
+
+	.ws-help-row-sub {
+		border-top: 1px solid #111827;
+		border-bottom: 1px solid #111827;
+	}
+
+	.ws-help-row-sub > summary {
+		background: #f7f7f7;
+		padding-left: 2.55rem;
+	}
+
+	.ws-help-feature-links a {
+		display: block;
+		padding: .72rem 1.25rem .72rem 3.35rem;
+		border-top: 1px solid #eef0f2;
+		color: var(--ws-help-link);
+		font-weight: 700;
+		text-decoration: none;
+	}
+
+	.ws-help-feature-links a.active {
+		color: #3f7fa6;
+		background: #fff;
+	}
+
+	.ws-help-empty-row {
+		padding: .75rem 1.25rem 1rem;
+		color: var(--ws-help-muted);
+		font-size: .9rem;
+		background: #fafafa;
+	}
+
+	body.ws-help-menu-open {
+		overflow: hidden !important;
+	}
+
 	@media (min-width: 900px) {
 		.ws-help-hero {
 			padding: 2rem max(2rem, calc((100vw - 1180px) / 2)) 2.4rem;
@@ -377,6 +479,11 @@
 			padding: 1.5rem 1rem 3rem;
 		}
 
+		.ws-help-menu-card {
+			position: sticky;
+			top: 1rem;
+		}
+
 		.ws-help-card-header,
 		.ws-help-article {
 			padding-left: 1.6rem;
@@ -384,4 +491,36 @@
 		}
 	}
 </style>
+
+<script>
+	(function () {
+		const drawer = document.getElementById("ws-help-drawer");
+		const trigger = document.querySelector(".ws-help-menu-trigger");
+		const close = document.querySelector(".ws-help-drawer-close");
+		if (!drawer || !trigger || !close) return;
+
+		function openMenu() {
+			drawer.hidden = false;
+			document.body.classList.add("ws-help-menu-open");
+			trigger.setAttribute("aria-expanded", "true");
+			close.focus();
+		}
+
+		function closeMenu() {
+			drawer.hidden = true;
+			document.body.classList.remove("ws-help-menu-open");
+			trigger.setAttribute("aria-expanded", "false");
+			trigger.focus();
+		}
+
+		trigger.addEventListener("click", openMenu);
+		close.addEventListener("click", closeMenu);
+		drawer.addEventListener("click", function (event) {
+			if (event.target === drawer) closeMenu();
+		});
+		document.addEventListener("keydown", function (event) {
+			if (event.key === "Escape" && !drawer.hidden) closeMenu();
+		});
+	})();
+</script>
 {% endblock %}

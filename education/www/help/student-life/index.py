@@ -17,6 +17,9 @@ def get_context(context):
 	context.title = _("Student Life Help")
 	context.parents = [{"name": _("Home"), "route": "/"}]
 	context.show_sidebar = False
+	context.app_mode = is_app_mode()
+	context.app_query = "&app=1" if context.app_mode else "&app=0"
+	context.menu_page_href = "/help/student-life/menu?app={}".format(1 if context.app_mode else 0)
 
 	context.menu_tree = get_wiki_menu_tree()
 	valid_routes = collect_menu_routes(context.menu_tree)
@@ -150,8 +153,16 @@ def normalize_route(route):
 	return unquote(route).strip().lstrip("/")
 
 
-def make_help_href(route):
-	return "/help/student-life?source={}".format(quote(normalize_route(route), safe=""))
+def is_app_mode():
+	return str(frappe.form_dict.get("app") or "0").strip().lower() in ("1", "true", "yes")
+
+
+def make_help_href(route, app_mode=None):
+	if app_mode is None:
+		app_mode = is_app_mode()
+
+	href = "/help/student-life?source={}".format(quote(normalize_route(route), safe=""))
+	return "{}&app={}".format(href, 1 if app_mode else 0)
 
 
 def collect_menu_routes(menu_tree):

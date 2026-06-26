@@ -75,9 +75,23 @@
 		--ws-help-shadow: 0 18px 45px rgba(17, 24, 39, 0.08);
 	}
 
-	body[data-route="help/student-life"] .page_content,
-	body[data-route="help/student-life"] .page-content-wrapper {
-		padding: 0;
+	body {
+		overflow-x: hidden;
+	}
+
+	.navbar,
+	.web-footer {
+		display: none !important;
+	}
+
+	.page_content,
+	.page-content-wrapper,
+	.web-page,
+	.container {
+		max-width: 100% !important;
+		overflow-x: hidden;
+		padding-left: 0 !important;
+		padding-right: 0 !important;
 	}
 
 	.ws-help-page,
